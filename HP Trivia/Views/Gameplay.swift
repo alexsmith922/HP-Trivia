@@ -15,6 +15,8 @@ struct Gameplay: View {
     @State private var musicPlayer: AVAudioPlayer!
     @State private var sfxPlayer: AVAudioPlayer!
     
+    @State private var animateViewsIn: Bool = false
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -28,7 +30,34 @@ struct Gameplay: View {
                 VStack {
                     // MARK: Controls
                     
+                    HStack {
+                        Button("End Game") {
+                            game.endGame()
+                            dismiss()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red.opacity(0.5))
+                        
+                        Spacer()
+                        
+                        Text("Score: \(game.gameScore)")
+                    }
+                    .padding()
+                    .padding(.vertical, 30)
+                    
                     // MARK: Question
+                    VStack {
+                        if animateViewsIn {
+                            Text(game.currentQuestion.question)
+                                .font(.custom("PartyLetPlain", size: 50))
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .transition(.scale)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 2), value: animateViewsIn)
+                    
+                    Spacer()
                     
                     // MARK: Hints
                     
@@ -40,10 +69,16 @@ struct Gameplay: View {
                 // MARK: Celebration
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .foregroundStyle(.white)
         }
         .ignoresSafeArea()
         .onAppear {
             game.startGame()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                animateViewsIn = true
+            }
+            
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 playMusic()
@@ -60,7 +95,7 @@ struct Gameplay: View {
         musicPlayer = try! AVAudioPlayer(contentsOf: URL(filePath: sound!))
         musicPlayer.numberOfLoops = -1
         musicPlayer.volume = 0.1
-        musicPlayer.play()
+//        musicPlayer.play()
     }
     
     private func playFlipSound() {

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct RecentScores: View {
+    @Environment(Game.self) private var game
     @Binding var animateViewsIn: Bool
     
     var body: some View {
@@ -18,11 +19,9 @@ struct RecentScores: View {
                     Text("Recent scores")
                         .font(.title2)
                     
-                    Text("31")
-                    
-                    Text("24")
-                    
-                    Text("17")
+                    Text("\(game.recentScores[0])")
+                    Text("\(game.recentScores[1])")
+                    Text("\(game.recentScores[2])")
                 }
                 .font(.title3)
                 .foregroundStyle(.white)
@@ -38,4 +37,5 @@ struct RecentScores: View {
 
 #Preview {
     RecentScores(animateViewsIn: .constant(true))
+        .environment(Game())
 }
