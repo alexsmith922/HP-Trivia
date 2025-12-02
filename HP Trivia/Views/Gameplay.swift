@@ -177,7 +177,7 @@ struct Gameplay: View {
                                         .transition(.scale)
                                     }
                                 }
-                                .animation(.easeInOut(duration: 1).delay(1.5, value: animateViewsIn))
+                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateViewsIn)
                             } else {
                                 VStack {
                                     if animateViewsIn {
@@ -198,7 +198,7 @@ struct Gameplay: View {
                                         .transition(.scale)
                                     }
                                 }
-                                .animation(.easeInOut(duration: 1).delay(1.5, value: animateViewsIn))
+                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateViewsIn)
                             }
                         }
                     }
