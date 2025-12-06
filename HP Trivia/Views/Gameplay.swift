@@ -11,6 +11,7 @@ import AVKit
 struct Gameplay: View {
     @Environment(Game.self) private var game
     @Environment(\.dismiss) private var dismiss
+    @Namespace private var namespace
     
     @State private var musicPlayer: AVAudioPlayer!
     @State private var sfxPlayer: AVAudioPlayer!
@@ -19,6 +20,7 @@ struct Gameplay: View {
     @State private var revealHint = false
     @State private var revealBook = false
     @State private var tappedCorrectAnswer = false
+    @State private var wrongAnswerstapped: [String] = []
     
     var body: some View {
         GeometryReader { geo in
@@ -159,22 +161,27 @@ struct Gameplay: View {
                             if answer == game.currentQuestion.answer {
                                 VStack {
                                     if animateViewsIn {
-                                        Button {
-                                            tappedCorrectAnswer = true
-                                            
-                                            playCorrectSound()
-                                            
-                                            game.correct()
-                                        } label: {
-                                            Text(answer)
-                                                .minimumScaleFactor(0.5)
-                                                .multilineTextAlignment(.center)
-                                                .padding(10)
-                                                .frame(width: geo.size.width/2.15, height: 80)
-                                                .background(.green.opacity(0.5))
-                                                .clipShape(.rect(cornerRadius: 25))
+                                        if !tappedCorrectAnswer {
+                                            Button {
+                                                withAnimation(.easeInOut(duration: 1)) {
+                                                    tappedCorrectAnswer = true
+                                                }
+                                                
+                                                playCorrectSound()
+                                                
+                                                game.correct()
+                                            } label: {
+                                                Text(answer)
+                                                    .minimumScaleFactor(0.5)
+                                                    .multilineTextAlignment(.center)
+                                                    .padding(10)
+                                                    .frame(width: geo.size.width/2.15, height: 80)
+                                                    .background(.green.opacity(0.5))
+                                                    .clipShape(.rect(cornerRadius: 25))
+                                                    .matchedGeometryEffect(id: 1, in: namespace)
+                                            }
+                                            .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
                                         }
-                                        .transition(.scale)
                                     }
                                 }
                                 .animation(.easeInOut(duration: 1).delay(1.5), value: animateViewsIn)
@@ -182,6 +189,10 @@ struct Gameplay: View {
                                 VStack {
                                     if animateViewsIn {
                                         Button {
+                                            withAnimation(.easeOut(duration: 1)) {
+                                                wrongAnswerstapped.append(answer)
+                                            }
+                                            
                                             playWrongSound()
                                             
                                             game.questionScore -= 1
@@ -192,10 +203,13 @@ struct Gameplay: View {
                                                 .multilineTextAlignment(.center)
                                                 .padding(10)
                                                 .frame(width: geo.size.width/2.15, height: 80)
-                                                .background(.green.opacity(0.5))
+                                                .background(wrongAnswerstapped.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
                                                 .clipShape(.rect(cornerRadius: 25))
+                                                .scaleEffect(wrongAnswerstapped.contains(answer) ? 0.8 : 1)
                                         }
                                         .transition(.scale)
+                                        .sensoryFeedback(.error, trigger: wrongAnswerstapped)
+                                        .disabled(wrongAnswerstapped.contains(answer))
                                     }
                                 }
                                 .animation(.easeInOut(duration: 1).delay(1.5), value: animateViewsIn)
@@ -209,6 +223,19 @@ struct Gameplay: View {
                 .frame(width: geo.size.width, height: geo.size.height)
                 
                 // MARK: Celebration
+                VStack {
+                    if tappedCorrectAnswer {
+                        Text(game.currentQuestion.answer)
+                            .minimumScaleFactor(0.5)
+                            .multilineTextAlignment(.center)
+                            .padding(10)
+                            .frame(width: geo.size.width/2.15, height: 80)
+                            .background(.green.opacity(0.5))
+                            .clipShape(.rect(cornerRadius: 25))
+                            .scaleEffect(2)
+                            .matchedGeometryEffect(id: 1, in: namespace)
+                    }
+                }
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .foregroundStyle(.white)
